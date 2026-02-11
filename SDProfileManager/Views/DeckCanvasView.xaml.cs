@@ -16,6 +16,7 @@ public sealed partial class DeckCanvasView : UserControl
     private bool _deferredScaleQueued;
     private double _lastAvailWidth = -1;
     private double _lastAvailHeight = -1;
+    private string _lastLayoutSignature = string.Empty;
 
     private KeypadGridView? _keypadGrid;
     private EncoderRowView? _encoderRow;
@@ -37,7 +38,16 @@ public sealed partial class DeckCanvasView : UserControl
 
     public void SetProfile(ProfileArchive? profile)
     {
+        var nextLayoutSignature = BuildLayoutSignature(profile);
+        if (ReferenceEquals(_profile, profile)
+            && string.Equals(_lastLayoutSignature, nextLayoutSignature, StringComparison.Ordinal))
+        {
+            Refresh();
+            return;
+        }
+
         _profile = profile;
+        _lastLayoutSignature = nextLayoutSignature;
         _lastAvailWidth = -1;
         _lastAvailHeight = -1;
         RebuildDeck();
@@ -295,6 +305,24 @@ public sealed partial class DeckCanvasView : UserControl
             Scale = resolvedScale,
             StageWidth = stageWidth
         };
+    }
+
+    private static string BuildLayoutSignature(ProfileArchive? profile)
+    {
+        if (profile is null)
+            return string.Empty;
+
+        var preset = profile.Preset;
+        return string.Join('|',
+            preset.Id,
+            preset.Columns,
+            preset.Rows,
+            preset.Dials,
+            preset.HasTouchStrip(),
+            preset.HasDialSlots(),
+            preset.IsTouchStripAboveKeys(),
+            preset.GetTouchStripRows(),
+            preset.GetTouchStripColumns());
     }
 }
 

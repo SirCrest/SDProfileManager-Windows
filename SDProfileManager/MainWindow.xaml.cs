@@ -190,8 +190,10 @@ public sealed partial class MainWindow : Window
         var widthFloor = Math.Min(2400, widthCap);
         var heightFloor = Math.Min(1600, heightCap);
 
-        var width = Math.Clamp(Math.Max(desiredWidth, widthFloor), 1500, widthCap);
-        var height = Math.Clamp(Math.Max(desiredHeight, heightFloor), 960, heightCap);
+        var minWidthBound = Math.Min(1500, widthCap);
+        var minHeightBound = Math.Min(960, heightCap);
+        var width = Math.Clamp(Math.Max(desiredWidth, widthFloor), minWidthBound, widthCap);
+        var height = Math.Clamp(Math.Max(desiredHeight, heightFloor), minHeightBound, heightCap);
         return new Windows.Graphics.SizeInt32(width, height);
     }
 
