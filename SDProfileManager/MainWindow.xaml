@@ -1,0 +1,17 @@
+<Window
+    x:Class="SDProfileManager.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:SDProfileManager.Views"
+    Title="SD Profile Manager">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource AppBgTop}" Offset="0"/>
+                <GradientStop Color="{StaticResource AppBgBottom}" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <views:ContentView x:Name="RootContentView"/>
+    </Grid>
+</Window>

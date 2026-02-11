@@ -1,0 +1,122 @@
+<UserControl
+    x:Class="SDProfileManager.Views.ContentView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="using:SDProfileManager.Views"
+    xmlns:sizers="using:CommunityToolkit.WinUI.Controls">
+
+    <Grid Padding="16" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header bar -->
+        <Border Grid.Row="0"
+                Background="{StaticResource HeaderBgBrush}"
+                BorderBrush="{StaticResource SubtleBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource HeaderCornerRadius}"
+                Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title -->
+                <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Text="SD Profile Manager"
+                               FontSize="22" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Open two Stream Deck profiles and move actions directly between them."
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- Right controls: undo/redo + actions -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!-- Undo/Redo group -->
+                    <Border Background="#33000000"
+                            BorderBrush="{StaticResource SubtleBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="11"
+                            Padding="4">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Button Style="{StaticResource HeaderIconButtonStyle}"
+                                    ToolTipService.ToolTip="Undo (Ctrl+Z)"
+                                    Command="{x:Bind ViewModel.UndoCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanUndo, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE10E;" FontSize="12"/>
+                            </Button>
+                            <Button Style="{StaticResource HeaderIconButtonStyle}"
+                                    ToolTipService.ToolTip="Redo (Ctrl+Y)"
+                                    Command="{x:Bind ViewModel.RedoCommand}"
+                                    IsEnabled="{x:Bind ViewModel.CanRedo, Mode=OneWay}">
+                                <FontIcon Glyph="&#xE10D;" FontSize="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Style="{StaticResource HeaderPillButtonStyle}"
+                            ToolTipService.ToolTip="Utilities">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE712;" FontSize="13"/>
+                            <TextBlock Text="Tools" FontSize="12" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="Open Logs"
+                                                Icon="OpenLocal"
+                                                Command="{x:Bind ViewModel.OpenLogsFolderCommand}"/>
+                                <MenuFlyoutItem Text="Diagnostics"
+                                                Icon="Preview"
+                                                Command="{x:Bind ViewModel.OpenDiagnosticsCommand}"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem Text="Check Updates"
+                                                Icon="Refresh"
+                                                Command="{x:Bind ViewModel.CheckForUpdatesCommand}"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Two-pane layout -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftPaneColumn" Width="*" MinWidth="480"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition x:Name="RightPaneColumn" Width="*" MinWidth="480"/>
+            </Grid.ColumnDefinitions>
+
+            <views:ProfilePaneView x:Name="LeftPane" Grid.Column="0"/>
+            <sizers:GridSplitter Grid.Column="1"
+                                 Width="10"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch"
+                                 ResizeDirection="Columns"
+                                 ResizeBehavior="BasedOnAlignment"/>
+            <views:ProfilePaneView x:Name="RightPane" Grid.Column="2"/>
+        </Grid>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2"
+                Background="{StaticResource StatusBarBgBrush}"
+                BorderBrush="{StaticResource SubtleBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="14,10">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="8" Height="8" Fill="{StaticResource StatusDotBrush}"/>
+                <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}"
+                           FontSize="12"
+                           MaxLines="1"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{StaticResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,126 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Background gradients -->
+    <Color x:Key="AppBgTop">#FF333336</Color>
+    <Color x:Key="AppBgBottom">#FF242426</Color>
+    <Color x:Key="PaneBgTop">#FF303033</Color>
+    <Color x:Key="PaneBgBottom">#FF242426</Color>
+    <Color x:Key="DeckStageBg">#FF292929</Color>
+    <Color x:Key="SlotBg">#FF1C1C1E</Color>
+    <Color x:Key="SlotBgHover">#FF1C2430</Color>
+
+    <!-- Solid brushes -->
+    <SolidColorBrush x:Key="AppBgBrush" Color="#FF2C2C2E"/>
+    <SolidColorBrush x:Key="PaneBgBrush" Color="#FF303033"/>
+    <SolidColorBrush x:Key="HeaderBgBrush" Color="#33000000"/>
+    <SolidColorBrush x:Key="StatusBarBgBrush" Color="#38000000"/>
+    <SolidColorBrush x:Key="CardBgBrush" Color="#3D000000"/>
+    <SolidColorBrush x:Key="ChipBgBrush" Color="#40000000"/>
+    <SolidColorBrush x:Key="SlotBgBrush" Color="#FF1C1C1E"/>
+    <SolidColorBrush x:Key="SlotBorderBrush" Color="#29FFFFFF"/>
+    <SolidColorBrush x:Key="SlotDropHighlightBrush" Color="#FF6EBDFF"/>
+    <SolidColorBrush x:Key="DeckStageBgBrush" Color="#FF292929"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFF5F5F7"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#A6FFFFFF"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#85FFFFFF"/>
+    <SolidColorBrush x:Key="TextDimBrush" Color="#55FFFFFF"/>
+
+    <!-- Accent / status -->
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="#FF9BC3FF"/>
+    <SolidColorBrush x:Key="StatusDotBrush" Color="#FF3DADFF"/>
+    <SolidColorBrush x:Key="PreflightErrorBrush" Color="#FFFF6B6B"/>
+    <SolidColorBrush x:Key="PreflightWarningBrush" Color="#FFFFD169"/>
+    <SolidColorBrush x:Key="PreflightOkBrush" Color="#FF5CD794"/>
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="SubtleBorderBrush" Color="#14FFFFFF"/>
+    <SolidColorBrush x:Key="CardBorderBrush" Color="#17FFFFFF"/>
+
+    <!-- Button brushes -->
+    <SolidColorBrush x:Key="ButtonDefaultBgBrush" Color="#38000000"/>
+    <SolidColorBrush x:Key="ButtonDefaultBorderBrush" Color="#17FFFFFF"/>
+    <SolidColorBrush x:Key="ButtonProminentBgBrush" Color="#E6FFFFFF"/>
+    <SolidColorBrush x:Key="ButtonProminentBorderBrush" Color="#2EFFFFFF"/>
+    <SolidColorBrush x:Key="ButtonProminentFgBrush" Color="#FF000000"/>
+
+    <!-- Dial -->
+    <SolidColorBrush x:Key="DialBorderBrush" Color="#2BFFFFFF"/>
+    <SolidColorBrush x:Key="StripBgBrush" Color="#FF000000"/>
+    <SolidColorBrush x:Key="StripBorderBrush" Color="#38FFFFFF"/>
+
+    <!-- Thickness -->
+    <Thickness x:Key="PaneMargin">12</Thickness>
+    <CornerRadius x:Key="PaneCornerRadius">16</CornerRadius>
+    <CornerRadius x:Key="HeaderCornerRadius">14</CornerRadius>
+    <CornerRadius x:Key="CardCornerRadius">10</CornerRadius>
+    <CornerRadius x:Key="ButtonCornerRadius">16</CornerRadius>
+    <CornerRadius x:Key="ChipCornerRadius">10</CornerRadius>
+
+    <!-- ===== Control Styles (must be in same dictionary to resolve StaticResource refs) ===== -->
+
+    <!-- Capsule / pill button (default) -->
+    <Style x:Key="PaneButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ButtonDefaultBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonDefaultBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="Padding" Value="11,7"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Prominent button (white bg, dark text) -->
+    <Style x:Key="PaneButtonProminentStyle" TargetType="Button" BasedOn="{StaticResource PaneButtonStyle}">
+        <Setter Property="Foreground" Value="{StaticResource ButtonProminentFgBrush}"/>
+        <Setter Property="Background" Value="{StaticResource ButtonProminentBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonProminentBorderBrush}"/>
+    </Style>
+
+    <!-- Header icon button (small, undo/redo) -->
+    <Style x:Key="HeaderIconButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="#3D000000"/>
+        <Setter Property="BorderBrush" Value="#14FFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- Header action button (pill) -->
+    <Style x:Key="HeaderPillButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="Background" Value="#42000000"/>
+        <Setter Property="BorderBrush" Value="#1AFFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- Metrics chip label -->
+    <Style x:Key="ChipLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+    </Style>
+
+    <!-- Metrics chip value -->
+    <Style x:Key="ChipValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
+
+</ResourceDictionary>

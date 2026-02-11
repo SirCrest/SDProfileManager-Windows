@@ -1,0 +1,33 @@
+<UserControl
+    x:Class="SDProfileManager.Views.PageStripView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Spacing="8">
+        <!-- Pin icon capsule -->
+        <Border Background="#3D000000"
+                BorderBrush="#14FFFFFF"
+                BorderThickness="1"
+                CornerRadius="16"
+                Width="54" Height="32">
+            <FontIcon Glyph="&#xE718;"
+                      FontSize="12"
+                      Foreground="#85FFFFFF"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Page buttons container -->
+        <Border Background="#3D000000"
+                BorderBrush="#1AFFFFFF"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="8,3">
+            <StackPanel x:Name="PageButtonsPanel"
+                        Orientation="Horizontal"
+                        Spacing="4"/>
+        </Border>
+    </StackPanel>
+</UserControl>

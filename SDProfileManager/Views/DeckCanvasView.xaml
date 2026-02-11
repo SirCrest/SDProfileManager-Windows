@@ -1,0 +1,15 @@
+<UserControl
+    x:Class="SDProfileManager.Views.DeckCanvasView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid x:Name="RootGrid"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Top"
+          Padding="12,9">
+        <StackPanel x:Name="DeckStack"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Spacing="12"/>
+    </Grid>
+</UserControl>

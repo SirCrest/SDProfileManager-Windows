@@ -1,0 +1,23 @@
+<UserControl
+    x:Class="SDProfileManager.Views.EncoderRowView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel x:Name="EncoderStack" HorizontalAlignment="Center" Spacing="14">
+        <!-- Touch strip bar -->
+        <Border x:Name="StripBar"
+                Background="{StaticResource StripBgBrush}"
+                BorderBrush="{StaticResource StripBorderBrush}"
+                BorderThickness="1.25"
+                CornerRadius="8"
+                Height="58"
+                HorizontalAlignment="Center">
+            <Grid x:Name="StripGrid" Padding="6"/>
+        </Border>
+
+        <!-- Dial row -->
+        <StackPanel x:Name="DialRow"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,56 @@
+<UserControl
+    x:Class="SDProfileManager.Views.ActionSlotControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AllowDrop="True"
+    DragOver="OnDragOver"
+    DragLeave="OnDragLeave"
+    Drop="OnDrop">
+
+    <Border x:Name="SlotBorder"
+            Background="{StaticResource SlotBgBrush}"
+            BorderBrush="{StaticResource SlotBorderBrush}"
+            BorderThickness="1.5"
+            CornerRadius="14">
+        <Grid x:Name="ContentGrid">
+            <!-- Image (action icon) -->
+            <Image x:Name="ActionImage"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="Collapsed"/>
+
+            <!-- Fallback initials -->
+            <Border x:Name="FallbackBorder"
+                    Background="#FF242628"
+                    CornerRadius="10"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Margin="6"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="FallbackText"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Foreground="#E6FFFFFF"/>
+            </Border>
+
+            <!-- Title overlay at bottom -->
+            <Border x:Name="TitleOverlay"
+                    Background="#5C000000"
+                    VerticalAlignment="Bottom"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="TitleText"
+                           TextAlignment="Center"
+                           MaxLines="2"
+                           TextWrapping="Wrap"
+                           TextTrimming="CharacterEllipsis"
+                           FontWeight="SemiBold"
+                           Foreground="#E6FFFFFF"
+                           Padding="5,2"/>
+            </Border>
+
+            <!-- Coordinate label (debug, hidden by default) -->
+        </Grid>
+    </Border>
+</UserControl>

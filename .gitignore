@@ -1,0 +1,21 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# Visual Studio state
+.vs/
+*.user
+*.suo
+*.userosscache
+
+# Local agent/tooling state
+.claude/
+.codex/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Root publish output
+SDProfileManager.exe
+SDProfileManager.pdb

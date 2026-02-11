@@ -1,0 +1,48 @@
+<UserControl
+    x:Class="SDProfileManager.Views.DialSlotControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AllowDrop="True"
+    DragOver="OnDragOver"
+    DragLeave="OnDragLeave"
+    Drop="OnDrop">
+
+    <Grid>
+        <Ellipse x:Name="DialBg"
+                 Fill="{StaticResource SlotBgBrush}"
+                 Stroke="{StaticResource DialBorderBrush}"
+                 StrokeThickness="1.5"/>
+
+        <!-- Image (action icon) -->
+        <Ellipse x:Name="ActionImageClip" Visibility="Collapsed">
+            <Ellipse.Fill>
+                <ImageBrush x:Name="ActionImageBrush"
+                            Stretch="UniformToFill"/>
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <!-- Fallback initials -->
+        <TextBlock x:Name="FallbackText"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontWeight="SemiBold"
+                   Foreground="#E6FFFFFF"
+                   Visibility="Collapsed"/>
+
+        <Border x:Name="DialBadge"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,4,4,0"
+                Padding="6,1"
+                CornerRadius="8"
+                Background="#5C000000"
+                BorderBrush="#26FFFFFF"
+                BorderThickness="1">
+            <TextBlock x:Name="DialBadgeText"
+                       FontSize="9"
+                       FontWeight="SemiBold"
+                       Foreground="#CCFFFFFF"
+                       Text="D1"/>
+        </Border>
+    </Grid>
+</UserControl>
