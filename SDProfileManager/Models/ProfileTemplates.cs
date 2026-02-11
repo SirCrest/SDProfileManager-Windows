@@ -89,15 +89,55 @@ public static class ProfileTemplates
     ];
 
     public static readonly IReadOnlyDictionary<string, ProfileTemplate> ById =
-        All.ToDictionary(t => t.Id);
+        All.ToDictionary(t => t.Id, StringComparer.OrdinalIgnoreCase);
 
     public static readonly IReadOnlyDictionary<string, ProfileTemplate> ByDeviceModel =
-        All.ToDictionary(t => t.DeviceModel);
+        All.ToDictionary(t => t.DeviceModel, StringComparer.OrdinalIgnoreCase);
+
+    private static readonly IReadOnlyDictionary<string, string> DeviceModelAliases =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            // Known Stream Deck XL variant observed in exported profiles.
+            ["20GAT9901"] = "20GAT9902"
+        };
+
+    private static readonly (string Prefix, string TemplateId)[] DeviceModelPrefixes =
+    [
+        ("20GAI", "mini"),
+        ("20GBJ", "neo"),
+        ("20GBL", "sd15"),
+        ("20GAT", "sdxl"),
+        ("20GBD", "sdplus"),
+        ("20GBX", "sdplusxl"),
+        ("20GBO", "sdstudio"),
+        ("GRET", "g100sd")
+    ];
 
     public static ProfileTemplate GetTemplate(string? deviceModel)
     {
-        if (deviceModel is not null && ByDeviceModel.TryGetValue(deviceModel, out var template))
-            return template;
-        return ById["sdplusxl"];
+        var normalized = (deviceModel ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(normalized))
+            return ById["sdxl"];
+
+        if (ByDeviceModel.TryGetValue(normalized, out var exact))
+            return exact;
+
+        if (DeviceModelAliases.TryGetValue(normalized, out var canonical)
+            && ByDeviceModel.TryGetValue(canonical, out var aliased))
+        {
+            return aliased;
+        }
+
+        foreach (var (prefix, templateId) in DeviceModelPrefixes)
+        {
+            if (normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                && ById.TryGetValue(templateId, out var byPrefix))
+            {
+                return byPrefix;
+            }
+        }
+
+        // Conservative unknown fallback: keypad-only XL instead of +XL with dials.
+        return ById["sdxl"];
     }
 }

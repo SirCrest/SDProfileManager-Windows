@@ -155,8 +155,15 @@ public class ProfileArchiveService
         var discoveredPageIds = DiscoverPageIds(pagesRootPath);
         var listedPageIds = OrderedUniquePageIds((profileManifest.Pages?.Pages ?? []).Select(NormalizePageId));
         var defaultPageId = NormalizePageId(profileManifest.Pages?.Default ?? template.DefaultPageId);
+        var currentPageId = NormalizePageId(profileManifest.Pages?.Current ?? "");
+        if (string.Equals(currentPageId, NormalizePageId(ProfileTemplates.ZeroUuid), StringComparison.OrdinalIgnoreCase))
+            currentPageId = "";
 
-        var allPageIds = OrderedUniquePageIds(listedPageIds.Concat([defaultPageId]).Concat(discoveredPageIds));
+        var allPageIds = OrderedUniquePageIds(
+            listedPageIds
+                .Concat([defaultPageId])
+                .Concat(string.IsNullOrEmpty(currentPageId) ? [] : [currentPageId])
+                .Concat(discoveredPageIds));
         if (allPageIds.Count == 0)
             allPageIds = [NormalizePageId(template.WorkingPageId)];
 
@@ -178,6 +185,12 @@ public class ProfileArchiveService
             throw new ArchiveServiceException("No valid page manifests found in profile.");
 
         var pageOrder = listedPageIds.Where(id => pageStates.ContainsKey(id)).ToList();
+        if (!string.IsNullOrEmpty(defaultPageId)
+            && pageStates.ContainsKey(defaultPageId)
+            && !pageOrder.Contains(defaultPageId))
+        {
+            pageOrder.Add(defaultPageId);
+        }
         if (pageOrder.Count == 0)
         {
             var sortedDiscovered = discoveredPageIds.Where(id => pageStates.ContainsKey(id)).ToList();
@@ -188,14 +201,6 @@ public class ProfileArchiveService
                 pageOrder = [defaultPageId];
             else if (sortedDiscovered.Count > 0)
                 pageOrder = [sortedDiscovered[0]];
-        }
-
-        foreach (var pageId in discoveredPageIds)
-        {
-            if (pageId == defaultPageId) continue;
-            if (!pageStates.ContainsKey(pageId)) continue;
-            if (!pageOrder.Contains(pageId))
-                pageOrder.Add(pageId);
         }
 
         if (pageOrder.Count == 0)

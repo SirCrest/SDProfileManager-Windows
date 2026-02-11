@@ -22,6 +22,7 @@ public sealed partial class ActionSlotControl : UserControl
     private string _coordinate = "";
     private string _pageId = "";
     private bool _isDropTarget;
+    private DateTimeOffset _lastFolderBackNavigateAt = DateTimeOffset.MinValue;
 
     private static readonly SolidColorBrush DefaultBorderBrush =
         new(Windows.UI.Color.FromArgb(0x29, 0xFF, 0xFF, 0xFF));
@@ -41,6 +42,8 @@ public sealed partial class ActionSlotControl : UserControl
         this.InitializeComponent();
         IsTabStop = true;
         PointerPressed += OnPointerPressed;
+        Tapped += OnTapped;
+        DoubleTapped += OnDoubleTapped;
         GotFocus += OnFocusChanged;
         LostFocus += OnFocusChanged;
         KeyDown += OnKeyDown;
@@ -67,9 +70,10 @@ public sealed partial class ActionSlotControl : UserControl
         _profile = profile;
         _pageId = pageId;
         var action = profile.GetAction(_controller, _coordinate, _pageId);
+        var isReservedFolderBackSlot = IsReservedFolderBackSlot();
         var hasAction = action is not null;
 
-        CanDrag = hasAction;
+        CanDrag = hasAction && !isReservedFolderBackSlot;
 
         try
         {
@@ -88,6 +92,8 @@ public sealed partial class ActionSlotControl : UserControl
             ShowEmptySlot();
         }
 
+        FolderBackOverlay.Visibility = isReservedFolderBackSlot ? Visibility.Visible : Visibility.Collapsed;
+        ToolTipService.SetToolTip(this, isReservedFolderBackSlot ? "Back from folder" : null);
         UpdateSlotChrome();
     }
 
@@ -159,6 +165,12 @@ public sealed partial class ActionSlotControl : UserControl
 
     private void OnDragStarting(UIElement sender, DragStartingEventArgs args)
     {
+        if (IsReservedFolderBackSlot())
+        {
+            args.Cancel = true;
+            return;
+        }
+
         if (_viewModel is null || _profile is null) return;
 
         var action = _profile.GetAction(_controller, _coordinate, _pageId);
@@ -171,6 +183,12 @@ public sealed partial class ActionSlotControl : UserControl
 
     private void OnDragOver(object sender, DragEventArgs e)
     {
+        if (IsReservedFolderBackSlot())
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+            return;
+        }
+
         if (_viewModel?.DragContext is null) return;
         if (_viewModel.DragContext.Controller != _controller)
         {
@@ -200,6 +218,9 @@ public sealed partial class ActionSlotControl : UserControl
         _isDropTarget = false;
         UpdateSlotChrome();
 
+        if (IsReservedFolderBackSlot())
+            return;
+
         if (_viewModel?.DragContext is null) return;
         _viewModel.DropAction(_side, _controller, _coordinate);
     }
@@ -210,6 +231,35 @@ public sealed partial class ActionSlotControl : UserControl
         UpdateSlotChrome();
     }
 
+    private void OnTapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (!IsReservedFolderBackSlot() || _viewModel is null)
+            return;
+
+        if (!CanTriggerFolderBackNavigation())
+        {
+            e.Handled = true;
+            return;
+        }
+
+        _viewModel.NavigateFolderBack(_side);
+        e.Handled = true;
+    }
+
+    private void OnDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        _ = Focus(FocusState.Programmatic);
+        if (IsReservedFolderBackSlot() && _viewModel is not null)
+        {
+            if (CanTriggerFolderBackNavigation())
+                _viewModel.NavigateFolderBack(_side);
+            e.Handled = true;
+            return;
+        }
+
+        _viewModel?.OpenFolderAction(_side, _controller, _coordinate);
+    }
+
     private void OnFocusChanged(object sender, RoutedEventArgs e)
     {
         UpdateSlotChrome();
@@ -217,6 +267,16 @@ public sealed partial class ActionSlotControl : UserControl
 
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
+        if (IsReservedFolderBackSlot())
+        {
+            if (e.Key is VirtualKey.Enter or VirtualKey.Space or VirtualKey.Back or VirtualKey.Delete)
+            {
+                _viewModel?.NavigateFolderBack(_side);
+                e.Handled = true;
+            }
+            return;
+        }
+
         if (e.Key is not (VirtualKey.Delete or VirtualKey.Back))
             return;
 
@@ -242,5 +302,20 @@ public sealed partial class ActionSlotControl : UserControl
 
         SlotBorder.BorderBrush = DefaultBorderBrush;
         SlotBorder.Background = DefaultBgBrush;
+    }
+
+    private bool IsReservedFolderBackSlot() =>
+        _controller == ControllerKind.Keypad
+        && string.Equals(_coordinate, "0,0", StringComparison.OrdinalIgnoreCase)
+        && _viewModel?.CanNavigateFolderBack(_side) == true;
+
+    private bool CanTriggerFolderBackNavigation()
+    {
+        var now = DateTimeOffset.UtcNow;
+        if ((now - _lastFolderBackNavigateAt).TotalMilliseconds < 220)
+            return false;
+
+        _lastFolderBackNavigateAt = now;
+        return true;
     }
 }

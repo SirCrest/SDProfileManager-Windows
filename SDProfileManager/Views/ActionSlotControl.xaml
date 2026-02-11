@@ -50,6 +50,20 @@
                            Padding="5,2"/>
             </Border>
 
+            <!-- Reserved folder-back overlay (top-left key while inside folder navigation) -->
+            <Border x:Name="FolderBackOverlay"
+                    Visibility="Collapsed"
+                    IsHitTestVisible="False"
+                    Background="#46000000"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+                <FontIcon Glyph="&#xE72B;"
+                          FontSize="34"
+                          Foreground="#E6FFFFFF"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"/>
+            </Border>
+
             <!-- Coordinate label (debug, hidden by default) -->
         </Grid>
     </Border>

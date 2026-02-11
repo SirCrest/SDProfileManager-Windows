@@ -6,18 +6,19 @@
     <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Center"
                 Spacing="8">
-        <!-- Pin icon capsule -->
-        <Border Background="#3D000000"
+        <Button x:Name="FolderBackButton"
+                Width="54"
+                Height="32"
+                Padding="0"
+                Background="#3D000000"
                 BorderBrush="#14FFFFFF"
                 BorderThickness="1"
-                CornerRadius="16"
-                Width="54" Height="32">
-            <FontIcon Glyph="&#xE718;"
+                CornerRadius="16">
+            <FontIcon x:Name="FolderBackIcon"
+                      Glyph="&#xE72B;"
                       FontSize="12"
-                      Foreground="#85FFFFFF"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"/>
-        </Border>
+                      Foreground="#85FFFFFF"/>
+        </Button>
 
         <!-- Page buttons container -->
         <Border Background="#3D000000"

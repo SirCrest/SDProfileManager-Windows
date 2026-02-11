@@ -68,6 +68,44 @@ public class WorkspaceViewModelTests
         Assert.Equal("Copied action to target.", vm.Status);
     }
 
+    [Fact]
+    public void OpenFolderAction_KeypadFolder_DoubleClickNavigationAndBackWork()
+    {
+        var vm = new WorkspaceViewModel();
+        var profile = ProfileFactory.Create(pageIds: ["home-page", "folder-page"]);
+        vm.LeftProfile = profile;
+        vm.LeftViewPageId = "home-page";
+
+        profile.SetAction(CreateFolderAction("folder-page"), ControllerKind.Keypad, "0,0", "home-page");
+
+        vm.OpenFolderAction(PaneSide.Left, ControllerKind.Keypad, "0,0");
+
+        Assert.Equal("folder-page", vm.GetViewPageId(PaneSide.Left));
+        Assert.True(vm.CanNavigateFolderBack(PaneSide.Left));
+
+        vm.NavigateFolderBack(PaneSide.Left);
+
+        Assert.Equal("home-page", vm.GetViewPageId(PaneSide.Left));
+        Assert.False(vm.CanNavigateFolderBack(PaneSide.Left));
+    }
+
+    [Fact]
+    public void OpenFolderAction_MissingFolderTarget_ReportsStatus()
+    {
+        var vm = new WorkspaceViewModel();
+        var profile = ProfileFactory.Create(pageIds: ["home-page"]);
+        vm.LeftProfile = profile;
+        vm.LeftViewPageId = "home-page";
+
+        profile.SetAction(CreateFolderAction("missing-page"), ControllerKind.Keypad, "0,0", "home-page");
+
+        vm.OpenFolderAction(PaneSide.Left, ControllerKind.Keypad, "0,0");
+
+        Assert.Equal("home-page", vm.GetViewPageId(PaneSide.Left));
+        Assert.Equal("Folder target is missing in this profile.", vm.Status);
+        Assert.False(vm.CanNavigateFolderBack(PaneSide.Left));
+    }
+
     private static JsonNode CreateAction()
     {
         return JsonNode.Parse("""
@@ -80,6 +118,28 @@ public class WorkspaceViewModelTests
               ],
               "Plugin": { "UUID": "com.test.plugin" },
               "Controller": "Keypad"
+            }
+            """)!;
+    }
+
+    private static JsonNode CreateFolderAction(string profileUuid)
+    {
+        return JsonNode.Parse($$"""
+            {
+              "Name": "Folder",
+              "UUID": "com.elgato.streamdeck.profile.openchild",
+              "State": 0,
+              "States": [
+                { "Name": "Folder", "Image": "" }
+              ],
+              "Plugin": {
+                "UUID": "com.elgato.streamdeck.profile",
+                "Name": "Folder"
+              },
+              "Controller": "Keypad",
+              "Settings": {
+                "ProfileUUID": "{{profileUuid}}"
+              }
             }
             """)!;
     }

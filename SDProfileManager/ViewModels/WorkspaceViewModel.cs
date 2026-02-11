@@ -38,6 +38,8 @@ public partial class WorkspaceViewModel : ObservableObject
     private const int MaxHistoryDepth = 80;
     private readonly List<WorkspaceHistorySnapshot> _undoStack = [];
     private readonly List<WorkspaceHistorySnapshot> _redoStack = [];
+    private readonly List<string> _leftFolderNavigation = [];
+    private readonly List<string> _rightFolderNavigation = [];
     private bool _isApplyingHistory;
 
     public WorkspaceViewModel()
@@ -273,6 +275,8 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
 
         RecordHistorySnapshot();
+        if (IsVisibleTopLevelPage(profile, resolvedPageId))
+            ResetFolderNavigation(side);
         SetPaneViewPage(side, resolvedPageId, updateProfileActivePage: true);
         Status = $"Switched {(side == PaneSide.Left ? "source" : "target")} page.";
         AppLog.Info($"Switched page side={side} page={resolvedPageId}");
@@ -291,6 +295,7 @@ public partial class WorkspaceViewModel : ObservableObject
 
         RecordHistorySnapshot();
         var createdPageId = profile.CreatePage();
+        ResetFolderNavigation(side);
         SetPaneViewPage(side, createdPageId, updateProfileActivePage: true);
         EnsurePaneViewPage(PaneSide.Left, updateProfileActivePage: false);
         EnsurePaneViewPage(PaneSide.Right, updateProfileActivePage: false);
@@ -395,6 +400,8 @@ public partial class WorkspaceViewModel : ObservableObject
             DragContext = null;
         }
 
+        PruneFolderNavigation(PaneSide.Left);
+        PruneFolderNavigation(PaneSide.Right);
         EnsurePaneViewPage(PaneSide.Left, updateProfileActivePage: false);
         EnsurePaneViewPage(PaneSide.Right, updateProfileActivePage: false);
         var currentPanePageId = GetViewPageId(side);
@@ -426,12 +433,14 @@ public partial class WorkspaceViewModel : ObservableObject
             LeftProfile = null;
             LeftViewPageId = "";
             LeftPreflightReport = null;
+            ResetFolderNavigation(PaneSide.Left);
         }
         else
         {
             RightProfile = null;
             RightViewPageId = "";
             RightPreflightReport = null;
+            ResetFolderNavigation(PaneSide.Right);
         }
 
         if (DragContext?.SourceSide == side)
@@ -440,6 +449,89 @@ public partial class WorkspaceViewModel : ObservableObject
         EnsureLayoutModeValidity();
         Status = $"Closed {(side == PaneSide.Left ? "source" : "target")} profile.";
         AppLog.Info($"Closed profile side={side} previous={profile.DisplayName}");
+    }
+
+    public void OpenFolderAction(PaneSide side, ControllerKind controller, string coordinate)
+    {
+        if (controller != ControllerKind.Keypad)
+            return;
+
+        var profile = GetProfile(side);
+        if (profile is null)
+            return;
+
+        var sourcePageId = GetViewPageId(side);
+        if (string.IsNullOrWhiteSpace(sourcePageId))
+            return;
+
+        var action = profile.GetAction(controller, coordinate, sourcePageId);
+        if (action is null)
+            return;
+
+        var folderTargetId = ProfileArchive.NormalizePageId(
+            action.GetProperty("Settings")?.GetProperty("ProfileUUID").GetStringValue() ?? "");
+        if (string.IsNullOrWhiteSpace(folderTargetId))
+            return;
+
+        if (profile.GetPageState(folderTargetId) is null)
+        {
+            Status = "Folder target is missing in this profile.";
+            AppLog.Warn($"Open folder failed side={side} sourcePage={sourcePageId} target={folderTargetId} reason=missing-page");
+            return;
+        }
+
+        if (string.Equals(folderTargetId, sourcePageId, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var stack = GetFolderNavigationStack(side);
+        if (stack.Count == 0 || !string.Equals(stack[^1], sourcePageId, StringComparison.OrdinalIgnoreCase))
+            stack.Add(sourcePageId);
+
+        SetPaneViewPage(side, folderTargetId, updateProfileActivePage: true);
+
+        if (IsSharedProfileView)
+            RefreshPreflightReports();
+        else
+            RefreshPreflight(side);
+
+        var folderName = profile.GetPageState(folderTargetId)?.Manifest.Name?.Trim();
+        Status = string.IsNullOrWhiteSpace(folderName)
+            ? "Opened folder page."
+            : $"Opened folder {folderName}.";
+        AppLog.Info($"Opened folder side={side} sourcePage={sourcePageId} targetPage={folderTargetId}");
+    }
+
+    public bool CanNavigateFolderBack(PaneSide side)
+    {
+        PruneFolderNavigation(side);
+        return GetFolderNavigationStack(side).Count > 0;
+    }
+
+    public void NavigateFolderBack(PaneSide side)
+    {
+        var profile = GetProfile(side);
+        if (profile is null)
+            return;
+
+        var stack = GetFolderNavigationStack(side);
+        while (stack.Count > 0)
+        {
+            var previousPage = stack[^1];
+            stack.RemoveAt(stack.Count - 1);
+            if (profile.GetPageState(previousPage) is null)
+                continue;
+
+            SetPaneViewPage(side, previousPage, updateProfileActivePage: true);
+            if (IsSharedProfileView)
+                RefreshPreflightReports();
+            else
+                RefreshPreflight(side);
+            Status = "Returned from folder.";
+            AppLog.Info($"Closed folder view side={side} page={previousPage}");
+            return;
+        }
+
+        Status = "No folder history on this pane.";
     }
 
     public void BeginDrag(PaneSide side, ControllerKind controller, string coordinate, JsonNode action, string pageId)
@@ -716,6 +808,8 @@ public partial class WorkspaceViewModel : ObservableObject
         SetPaneViewPage(anchorSide, anchorPageId, updateProfileActivePage: true);
         SetPaneViewPage(otherSide, otherPageId, updateProfileActivePage: false);
 
+        ResetFolderNavigation(PaneSide.Left);
+        ResetFolderNavigation(PaneSide.Right);
         DragContext = null;
         OnPropertyChanged(nameof(IsSharedProfileView));
         RefreshPreflightReports();
@@ -753,6 +847,8 @@ public partial class WorkspaceViewModel : ObservableObject
             SetPaneViewPage(PaneSide.Left, leftPageId, updateProfileActivePage: true);
         if (!string.IsNullOrWhiteSpace(rightPageId))
             SetPaneViewPage(PaneSide.Right, rightPageId, updateProfileActivePage: true);
+        ResetFolderNavigation(PaneSide.Left);
+        ResetFolderNavigation(PaneSide.Right);
         DragContext = null;
         OnPropertyChanged(nameof(IsSharedProfileView));
 
@@ -763,6 +859,7 @@ public partial class WorkspaceViewModel : ObservableObject
     private void SetProfileForPane(PaneSide side, ProfileArchive? profile, string? preferredPageId = null)
     {
         DragContext = null;
+        ResetFolderNavigation(side);
 
         if (side == PaneSide.Left)
         {
@@ -846,6 +943,43 @@ public partial class WorkspaceViewModel : ObservableObject
 
     private static PaneSide OppositeSide(PaneSide side) =>
         side == PaneSide.Left ? PaneSide.Right : PaneSide.Left;
+
+    private List<string> GetFolderNavigationStack(PaneSide side) =>
+        side == PaneSide.Left ? _leftFolderNavigation : _rightFolderNavigation;
+
+    private void ResetFolderNavigation(PaneSide side)
+    {
+        var stack = GetFolderNavigationStack(side);
+        if (stack.Count > 0)
+            stack.Clear();
+    }
+
+    private void PruneFolderNavigation(PaneSide side)
+    {
+        var profile = GetProfile(side);
+        var stack = GetFolderNavigationStack(side);
+        if (stack.Count == 0)
+            return;
+
+        if (profile is null)
+        {
+            stack.Clear();
+            return;
+        }
+
+        stack.RemoveAll(pageId => profile.GetPageState(pageId) is null);
+    }
+
+    private static bool IsVisibleTopLevelPage(ProfileArchive profile, string pageId)
+    {
+        var normalizedPageId = ProfileArchive.NormalizePageId(pageId);
+        var visiblePageIds = profile.PageOrder.Count > 0
+            ? profile.PageOrder
+            : [profile.ActivePageId];
+
+        return visiblePageIds.Any(id =>
+            string.Equals(ProfileArchive.NormalizePageId(id), normalizedPageId, StringComparison.OrdinalIgnoreCase));
+    }
 
     private static string TemporaryOpenPath(ProfileArchive profile)
     {
@@ -990,6 +1124,8 @@ public partial class WorkspaceViewModel : ObservableObject
                 RightProfile.SetActivePage(GetViewPageId(PaneSide.Right));
 
             LockSourceProfile = snapshot.LockSourceProfile;
+            ResetFolderNavigation(PaneSide.Left);
+            ResetFolderNavigation(PaneSide.Right);
             DragContext = null;
             OnPropertyChanged(nameof(IsSharedProfileView));
             RefreshPreflightReports();

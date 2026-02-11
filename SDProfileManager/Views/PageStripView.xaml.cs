@@ -42,6 +42,14 @@ public sealed partial class PageStripView : UserControl
     private void RebuildButtons()
     {
         if (_viewModel is null || _profile is null) return;
+
+        var canGoBack = _viewModel.CanNavigateFolderBack(_side);
+        FolderBackButton.Click -= OnFolderBackClicked;
+        FolderBackButton.Click += OnFolderBackClicked;
+        FolderBackButton.IsEnabled = canGoBack;
+        FolderBackButton.Opacity = canGoBack ? 1.0 : 0.45;
+        ToolTipService.SetToolTip(FolderBackButton, canGoBack ? "Back from folder" : "No folder history.");
+
         PageButtonsPanel.Children.Clear();
 
         var pageIds = _profile.PageOrder.Count > 0
@@ -107,6 +115,11 @@ public sealed partial class PageStripView : UserControl
             ToolTipService.SetToolTip(addBtn, $"Maximum {WorkspaceViewModel.MaxSupportedPages} pages.");
         }
         PageButtonsPanel.Children.Add(addBtn);
+    }
+
+    private void OnFolderBackClicked(object sender, RoutedEventArgs e)
+    {
+        _viewModel?.NavigateFolderBack(_side);
     }
 
     private MenuFlyout BuildPageContextFlyout(string pageId, int pageNumber, bool canDeletePage)
