@@ -372,6 +372,13 @@ public partial class WorkspaceViewModel : ObservableObject
             return;
         }
 
+        if (profile.GetPageState(normalizedPageId) is null)
+        {
+            Status = "Page remove failed.";
+            AppLog.Warn($"Remove page failed side={side} page={normalizedPageId} reason=missing-page");
+            return;
+        }
+
         RecordHistorySnapshot();
         var removed = profile.RemovePage(normalizedPageId);
         if (!removed)
